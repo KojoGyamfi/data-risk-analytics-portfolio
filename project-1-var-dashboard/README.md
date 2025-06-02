@@ -41,3 +41,4 @@ Designed to replicate the kind of daily risk summaries used by risk managers, po
 2. Install required packages:
 ```bash
 pip install pandas numpy matplotlib streamlit
+streamlit run app.py
