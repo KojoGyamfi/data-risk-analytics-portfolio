@@ -27,7 +27,7 @@ This project delivers a responsive, interactive Value-at-Risk (VaR) dashboard us
 
 ---
 
-## 🛠 Technical Highlights
+##  Technical Highlights
 
 - **Tech stack:** Python, Streamlit, yFinance, Pandas, NumPy, Matplotlib
 - **Core Metrics:**
