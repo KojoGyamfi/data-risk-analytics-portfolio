@@ -41,7 +41,7 @@ This dashboard allows users to:
 ![VaR Metrics](./screenshots/metrics.png)
 *Parametric and Historical VaR outputs*
 
-![Return Distribution](./screenshots/distribution.png)
+![VaR Metrics](./screenshots/distribution.png)
 *Portfolio return distribution with VaR overlay*
 ---
 
