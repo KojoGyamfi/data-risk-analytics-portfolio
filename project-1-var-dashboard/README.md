@@ -35,14 +35,15 @@ This dashboard allows users to:
 
 ## Dashboard Preview
 
-![Overview](./screenshots/overview.png)
+[Overview](./screenshots/overview.png)
 *Full dashboard layout*
 
-![VaR Metrics](./screenshots/metrics.png)
+[VaR Metrics](./screenshots/metrics.png)
 *Parametric and Historical VaR outputs*
 
-![VaR Metrics](./screenshots/distribution.png)
+[VaR Metrics](./screenshots/distribution.png)
 *Portfolio return distribution with VaR overlay*
+
 ---
 
 ##  How to Run
