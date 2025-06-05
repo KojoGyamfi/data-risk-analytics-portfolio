@@ -46,11 +46,11 @@ def compute_attribution(positions_df, market_df, pnl_df):
     df['explained_pnl'] = df['explained_pnl_per_unit'] * df['position']
 
     # Merge with actual P&L
-    df = df.merge(pnl_df, on='trade_id')
-    df['residual'] = df['actual_pnl'] - df['explained_pnl']
+    final_df = df.merge(pnl_df, on='trade_id')
+    final_df['residual'] = final_df['actual_pnl'] - final_df['explained_pnl']
 
     # Output columns
-    output = df[[
+    output = final_df[[
         'trade_id', 'ticker', 'instrument_type', 'position',
         'delta_pnl', 'gamma_pnl', 'vega_pnl', 'theta_pnl',
         'explained_pnl', 'actual_pnl', 'residual'
