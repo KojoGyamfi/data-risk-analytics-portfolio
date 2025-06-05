@@ -1,10 +1,11 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
+from scipy.stats import norm
 from io import BytesIO
-import datetime
 
 # --------------------------
 # Page Setup
@@ -34,22 +35,29 @@ total_weight = sum(weights.values())
 if total_weight == 0:
     st.warning("Total weight must be greater than 0.")
     st.stop()
+elif not 0.99 <= total_weight <= 1.01:
+    st.error(f"⚠️ Total weight must sum to 1.00 (100%). Currently: {total_weight:.2f}")
+    st.stop()
 
-weights = {k: v / total_weight for k, v in weights.items()}
+st.sidebar.subheader("VaR Settings")
+var_method = st.sidebar.selectbox(
+    "Select Parametric VaR Method",
+    ["Full-window percentile", "Rolling-volatility parametric"],
+    help="Choose 'Rolling-volatility parametric' to estimate VaR assuming returns are normally distributed and recent volatility represents future risk."
+)
 
 confidence_level = st.sidebar.selectbox("Confidence Level", [0.95, 0.99])
-vol_window = st.sidebar.slider("Rolling Volatility Window", 10, 60, 20)
+vol_window = st.sidebar.slider("Rolling Volatility Window (Days)", 10, 60, 20)
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
-end_date = st.sidebar.date_input("End Date", value=datetime.date(datetime.datetime.now().year, 1, 1))
+end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2025-01-01"))
 
 # --------------------------
-# Data Fetching
+# Data Fetching (Robust Fix)
 # --------------------------
 try:
     data = yf.download(tickers, start=start_date, end=end_date)
 
     if isinstance(data.columns, pd.MultiIndex):
-        # Try to get 'Adj Close' if available
         if 'Adj Close' in data.columns.levels[0]:
             raw_data = data['Adj Close']
         elif 'Close' in data.columns.levels[0]:
@@ -58,7 +66,6 @@ try:
             st.error("Neither 'Adj Close' nor 'Close' prices found in downloaded data.")
             st.stop()
     else:
-        # Single ticker fallback
         if 'Adj Close' in data.columns:
             raw_data = data[['Adj Close']].copy()
         elif 'Close' in data.columns:
@@ -66,7 +73,7 @@ try:
         else:
             st.error("No usable price data found for the selected ticker.")
             st.stop()
-        raw_data.columns = [tickers[0]]  # Rename for consistency
+        raw_data.columns = [tickers[0]]
 
     raw_data.dropna(axis=1, how='all', inplace=True)
     available_tickers = raw_data.columns.tolist()
@@ -83,13 +90,9 @@ except Exception as e:
     st.error(f"Error fetching data: {e}")
     st.stop()
 
-
 # --------------------------
-# Risk Metrics (Parametric & Historical)
+# Risk Metrics (Updated)
 # --------------------------
-def calculate_parametric_var(series, confidence=0.95):
-    return -np.percentile(series, (1 - confidence) * 100)
-
 def calculate_historical_var(series, confidence=0.95):
     sorted_returns = series.sort_values()
     index = int((1 - confidence) * len(sorted_returns))
@@ -100,12 +103,17 @@ def calculate_expected_shortfall(series, confidence=0.95):
     return -series[series <= threshold].mean()
 
 portfolio_returns = returns['Portfolio']
-latest_vol = portfolio_returns.rolling(vol_window).std().iloc[-1]
+z_score = norm.ppf(confidence_level)
+rolling_vol = portfolio_returns.rolling(vol_window).std().iloc[-1]
 
-parametric_var = calculate_parametric_var(portfolio_returns, confidence=confidence_level)
+if var_method == "Full-window percentile":
+    parametric_var = -np.percentile(portfolio_returns, (1 - confidence_level) * 100)
+else:
+    parametric_var = z_score * rolling_vol
+
 historical_var = calculate_historical_var(portfolio_returns, confidence=confidence_level)
 expected_shortfall = calculate_expected_shortfall(portfolio_returns, confidence=confidence_level)
-annual_volatility = latest_vol * np.sqrt(252)
+annual_volatility = rolling_vol * np.sqrt(252)
 
 # --------------------------
 # Export Report
@@ -140,6 +148,10 @@ col1.metric(label=f"{int(confidence_level*100)}% Parametric VaR", value=f"{param
 col2.metric(label=f"{int(confidence_level*100)}% Historical VaR", value=f"{historical_var:.2%}")
 st.metric(label=f"{int(confidence_level*100)}% Expected Shortfall", value=f"{expected_shortfall:.2%}")
 st.metric(label="Annualized Volatility", value=f"{annual_volatility:.2%}")
+
+st.caption(
+    "Note: Parametric VaR assumes returns are normally distributed. When using the rolling volatility method, the model reflects the most recent market behavior."
+)
 
 if parametric_var > 0.03 or historical_var > 0.03:
     st.warning("⚠️ One or more VaR metrics exceed 3% — consider reducing risk exposure.")
