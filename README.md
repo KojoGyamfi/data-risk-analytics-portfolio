@@ -10,7 +10,7 @@ Each project is built around practical use cases in financial markets, risk mana
    Visualizes VaR, rolling volatility, and exposure breakdowns using Streamlit/Tableau.
 
 2. **[P&L Explain Tool with Greek Attribution](./project-2-pnl-explain)**  
-   Breaks down daily P&L into key drivers like delta, gamma, FX, and IR shifts.
+   Breaks down daily P&L into key drivers like delta, gamma, vega, and theta.
 
 3. **[Risk Limit Breach Monitoring Engine](./project-3-limit-monitoring)**  
    Automated Python engine that detects and alerts on portfolio breaches.
