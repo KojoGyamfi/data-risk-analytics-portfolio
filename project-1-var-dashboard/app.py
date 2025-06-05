@@ -47,7 +47,6 @@ end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2024-01-01"))
 try:
     data = yf.download(tickers, start=start_date, end=end_date)
 
-    # Handle both single and multi-ticker format
     if isinstance(data.columns, pd.MultiIndex) and 'Adj Close' in data.columns.levels[0]:
         raw_data = data['Adj Close']
     elif 'Adj Close' in data.columns:
@@ -72,18 +71,27 @@ except Exception as e:
     st.stop()
 
 # --------------------------
-# Risk Metrics
+# Risk Metrics (Parametric & Historical)
 # --------------------------
-def calculate_var(series, confidence=0.95):
+def calculate_parametric_var(series, confidence=0.95):
     return -np.percentile(series, (1 - confidence) * 100)
 
-def calculate_es(series, confidence=0.95):
+def calculate_historical_var(series, confidence=0.95):
+    sorted_returns = series.sort_values()
+    index = int((1 - confidence) * len(sorted_returns))
+    return -sorted_returns.iloc[index]
+
+def calculate_expected_shortfall(series, confidence=0.95):
     threshold = np.percentile(series, (1 - confidence) * 100)
     return -series[series <= threshold].mean()
 
-latest_var = calculate_var(returns['Portfolio'], confidence=confidence_level)
-latest_es = calculate_es(returns['Portfolio'], confidence=confidence_level)
-rolling_vol = returns['Portfolio'].rolling(vol_window).std()
+portfolio_returns = returns['Portfolio']
+latest_vol = portfolio_returns.rolling(vol_window).std().iloc[-1]
+
+parametric_var = calculate_parametric_var(portfolio_returns, confidence=confidence_level)
+historical_var = calculate_historical_var(portfolio_returns, confidence=confidence_level)
+expected_shortfall = calculate_expected_shortfall(portfolio_returns, confidence=confidence_level)
+annual_volatility = latest_vol * np.sqrt(252)
 
 # --------------------------
 # Export Report
@@ -92,8 +100,18 @@ def convert_df_to_csv(df):
     return df.to_csv(index=True).encode('utf-8')
 
 report_df = pd.DataFrame({
-    "Metric": ["VaR", "Expected Shortfall", "Annualized Volatility"],
-    "Value": [f"{latest_var:.2%}", f"{latest_es:.2%}", f"{rolling_vol.iloc[-1]*np.sqrt(252):.2%}"]
+    "Metric": [
+        f"Parametric VaR ({int(confidence_level*100)}%)",
+        f"Historical VaR ({int(confidence_level*100)}%)",
+        f"Expected Shortfall ({int(confidence_level*100)}%)",
+        "Annualized Volatility"
+    ],
+    "Value": [
+        f"{parametric_var:.2%}",
+        f"{historical_var:.2%}",
+        f"{expected_shortfall:.2%}",
+        f"{annual_volatility:.2%}"
+    ]
 })
 
 csv = convert_df_to_csv(report_df)
@@ -102,23 +120,27 @@ csv = convert_df_to_csv(report_df)
 # Dashboard Display
 # --------------------------
 st.subheader("🔐 Portfolio Risk Summary")
-st.metric(label=f"{int(confidence_level*100)}% 1-Day VaR", value=f"{latest_var:.2%}")
-st.metric(label=f"{int(confidence_level*100)}% Expected Shortfall", value=f"{latest_es:.2%}")
-st.metric(label="Annualized Volatility", value=f"{rolling_vol.iloc[-1]*np.sqrt(252):.2%}")
 
-if latest_var > 0.03:
-    st.warning("⚠️ VaR exceeds 3% threshold — review portfolio risk exposure!")
+col1, col2 = st.columns(2)
+col1.metric(label=f"{int(confidence_level*100)}% Parametric VaR", value=f"{parametric_var:.2%}")
+col2.metric(label=f"{int(confidence_level*100)}% Historical VaR", value=f"{historical_var:.2%}")
+st.metric(label=f"{int(confidence_level*100)}% Expected Shortfall", value=f"{expected_shortfall:.2%}")
+st.metric(label="Annualized Volatility", value=f"{annual_volatility:.2%}")
+
+if parametric_var > 0.03 or historical_var > 0.03:
+    st.warning("⚠️ One or more VaR metrics exceed 3% — consider reducing risk exposure.")
 
 st.download_button("📥 Download Risk Summary (CSV)", data=csv, file_name="risk_report.csv", mime='text/csv')
 
 st.subheader("📉 Rolling Volatility")
-st.line_chart(rolling_vol)
+st.line_chart(portfolio_returns.rolling(vol_window).std())
 
 st.subheader("📈 Return Distribution")
 fig, ax = plt.subplots()
-returns['Portfolio'].hist(bins=50, ax=ax, color='skyblue', edgecolor='black')
-ax.axvline(-latest_var, color='red', linestyle='--', label='VaR Threshold')
-ax.axvline(-latest_es, color='orange', linestyle='--', label='ES Threshold')
+portfolio_returns.hist(bins=50, ax=ax, color='skyblue', edgecolor='black')
+ax.axvline(-parametric_var, color='red', linestyle='--', label='Parametric VaR')
+ax.axvline(-historical_var, color='green', linestyle='--', label='Historical VaR')
+ax.axvline(-expected_shortfall, color='orange', linestyle='--', label='Expected Shortfall')
 ax.set_title('Distribution of Daily Portfolio Returns')
 ax.legend()
 st.pyplot(fig)
