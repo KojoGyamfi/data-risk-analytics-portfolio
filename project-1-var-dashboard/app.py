@@ -5,11 +5,15 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 from io import BytesIO
 
+# --------------------------
 # Page Setup
+# --------------------------
 st.set_page_config(page_title="Real Portfolio VaR Dashboard", layout="wide")
 st.title("📊 Daily VaR & Risk Dashboard – Real Portfolio")
 
+# --------------------------
 # Sidebar Inputs
+# --------------------------
 st.sidebar.header("Portfolio Configuration")
 tickers = st.sidebar.multiselect(
     "Select Assets (max 5):",
@@ -17,23 +21,49 @@ tickers = st.sidebar.multiselect(
     default=['AAPL', 'MSFT', 'GOOGL']
 )
 
+if not tickers:
+    st.warning("Please select at least one ticker.")
+    st.stop()
+
 weights = {}
 for ticker in tickers:
     weights[ticker] = st.sidebar.slider(f"{ticker} Weight", 0.0, 1.0, 0.33, 0.01)
+
 total_weight = sum(weights.values())
+if total_weight == 0:
+    st.warning("Total weight must be greater than 0.")
+    st.stop()
+
 weights = {k: v / total_weight for k, v in weights.items()}
 
 confidence_level = st.sidebar.selectbox("Confidence Level", [0.95, 0.99])
 vol_window = st.sidebar.slider("Rolling Volatility Window", 10, 60, 20)
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
-end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2024-12-31"))
+end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2024-01-01"))
 
+# --------------------------
 # Data Fetching
-data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
-returns = data.pct_change().dropna()
-returns['Portfolio'] = sum(returns[ticker] * weight for ticker, weight in weights.items())
+# --------------------------
+try:
+    raw_data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
+    raw_data.dropna(axis=1, how='all', inplace=True)
+    available_tickers = raw_data.columns.tolist()
 
+    if raw_data.empty or not available_tickers:
+        st.error("No valid data retrieved for the selected tickers and dates. Please adjust your selection.")
+        st.stop()
+
+    valid_weights = {ticker: weights[ticker] for ticker in available_tickers}
+    returns = raw_data.pct_change().dropna()
+    returns['Portfolio'] = sum(returns[ticker] * valid_weights[ticker] for ticker in valid_weights)
+
+except Exception as e:
+    st.error(f"Error fetching data: {e}")
+    st.stop()
+
+# --------------------------
 # Risk Metrics
+# --------------------------
 def calculate_var(series, confidence=0.95):
     return -np.percentile(series, (1 - confidence) * 100)
 
@@ -45,7 +75,9 @@ latest_var = calculate_var(returns['Portfolio'], confidence=confidence_level)
 latest_es = calculate_es(returns['Portfolio'], confidence=confidence_level)
 rolling_vol = returns['Portfolio'].rolling(vol_window).std()
 
+# --------------------------
 # Export Report
+# --------------------------
 def convert_df_to_csv(df):
     return df.to_csv(index=True).encode('utf-8')
 
@@ -56,7 +88,9 @@ report_df = pd.DataFrame({
 
 csv = convert_df_to_csv(report_df)
 
+# --------------------------
 # Dashboard Display
+# --------------------------
 st.subheader("🔐 Portfolio Risk Summary")
 st.metric(label=f"{int(confidence_level*100)}% 1-Day VaR", value=f"{latest_var:.2%}")
 st.metric(label=f"{int(confidence_level*100)}% Expected Shortfall", value=f"{latest_es:.2%}")
