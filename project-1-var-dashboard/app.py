@@ -4,6 +4,7 @@ import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
 from io import BytesIO
+import datetime
 
 # --------------------------
 # Page Setup
@@ -39,7 +40,7 @@ weights = {k: v / total_weight for k, v in weights.items()}
 confidence_level = st.sidebar.selectbox("Confidence Level", [0.95, 0.99])
 vol_window = st.sidebar.slider("Rolling Volatility Window", 10, 60, 20)
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
-end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2024-01-01"))
+end_date = st.sidebar.date_input("End Date", value=datetime.date(datetime.datetime.now().year, 1, 1))
 
 # --------------------------
 # Data Fetching
