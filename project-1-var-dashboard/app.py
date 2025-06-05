@@ -42,10 +42,20 @@ start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2023-01-0
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2024-01-01"))
 
 # --------------------------
-# Data Fetching
+# Data Fetching (with Fix)
 # --------------------------
 try:
-    raw_data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
+    data = yf.download(tickers, start=start_date, end=end_date)
+
+    # Handle both single and multi-ticker format
+    if isinstance(data.columns, pd.MultiIndex) and 'Adj Close' in data.columns.levels[0]:
+        raw_data = data['Adj Close']
+    elif 'Adj Close' in data.columns:
+        raw_data = data[['Adj Close']].copy()
+        raw_data.columns = [tickers[0]]
+    else:
+        raw_data = data.copy()
+
     raw_data.dropna(axis=1, how='all', inplace=True)
     available_tickers = raw_data.columns.tolist()
 
