@@ -42,24 +42,36 @@ start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2023-01-0
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2024-01-01"))
 
 # --------------------------
-# Data Fetching (with Fix)
+# Data Fetching
 # --------------------------
 try:
     data = yf.download(tickers, start=start_date, end=end_date)
 
-    if isinstance(data.columns, pd.MultiIndex) and 'Adj Close' in data.columns.levels[0]:
-        raw_data = data['Adj Close']
-    elif 'Adj Close' in data.columns:
-        raw_data = data[['Adj Close']].copy()
-        raw_data.columns = [tickers[0]]
+    if isinstance(data.columns, pd.MultiIndex):
+        # Try to get 'Adj Close' if available
+        if 'Adj Close' in data.columns.levels[0]:
+            raw_data = data['Adj Close']
+        elif 'Close' in data.columns.levels[0]:
+            raw_data = data['Close']
+        else:
+            st.error("Neither 'Adj Close' nor 'Close' prices found in downloaded data.")
+            st.stop()
     else:
-        raw_data = data.copy()
+        # Single ticker fallback
+        if 'Adj Close' in data.columns:
+            raw_data = data[['Adj Close']].copy()
+        elif 'Close' in data.columns:
+            raw_data = data[['Close']].copy()
+        else:
+            st.error("No usable price data found for the selected ticker.")
+            st.stop()
+        raw_data.columns = [tickers[0]]  # Rename for consistency
 
     raw_data.dropna(axis=1, how='all', inplace=True)
     available_tickers = raw_data.columns.tolist()
 
     if raw_data.empty or not available_tickers:
-        st.error("No valid data retrieved for the selected tickers and dates. Please adjust your selection.")
+        st.error("No valid price data retrieved for selected tickers and dates.")
         st.stop()
 
     valid_weights = {ticker: weights[ticker] for ticker in available_tickers}
@@ -69,6 +81,7 @@ try:
 except Exception as e:
     st.error(f"Error fetching data: {e}")
     st.stop()
+
 
 # --------------------------
 # Risk Metrics (Parametric & Historical)
