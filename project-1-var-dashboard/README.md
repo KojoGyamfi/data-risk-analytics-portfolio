@@ -13,7 +13,7 @@ This dashboard allows users to:
   - Full-window percentile (non-parametric)
   - Rolling-volatility parametric (normal distribution with z-score)
 - Adjust:
-  - Asset weights
+  - Portfolio weights
   - Confidence level (95% or 99%)
   - Rolling volatility window
 - View:
@@ -24,6 +24,7 @@ This dashboard allows users to:
 
 ---
 
+
 ##  Key Risk Metrics
 
 - **Value at Risk (VaR):** Estimates the maximum daily loss within a chosen confidence interval
@@ -32,13 +33,23 @@ This dashboard allows users to:
 
 >  Parametric VaR assumes returns are normally distributed. When using the rolling-volatility method, the model reflects recent market behavior.
 
+## Dashboard Preview
+
+[Overview](./screenshots/overview.png)
+*Full dashboard layout*
+
+[VaR Metrics](./screenshots/metrics.png)
+*Parametric and Historical VaR outputs*
+
+[Return Distribution](./screenshots/distribution.png)
+*Portfolio return distribution with VaR overlay*
 ---
 
 ##  How to Run
 
 ###  Requirements
 
-Make sure you have Python 3.8+ installed, then install the necessary packages:
+Make sure you have Python 3.8+ installed, then install dependencies from requirements.txt:
 
 ```bash
 pip install -r requirements.txt
