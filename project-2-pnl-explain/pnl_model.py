@@ -1,13 +1,13 @@
 import pandas as pd
+import os
 
 def load_data(data_dir="data"):
-    positions = pd.read_csv(f"{data_dir}/positions.csv")
-    market = pd.read_csv(f"{data_dir}/market_data.csv")
-    pnl_actuals = pd.read_csv(f"{data_dir}/pnl_actuals.csv")
+    positions = pd.read_csv(os.path.join(data_dir, "positions.csv"))
+    market = pd.read_csv(os.path.join(data_dir, "market_data.csv"))
+    pnl_actuals = pd.read_csv(os.path.join(data_dir, "pnl_actuals.csv"))
     return positions, market, pnl_actuals
 
 def compute_daily_pnl_explained(positions_df, market_df, pnl_df):
-    # Prepare market data with previous day values
     market_df = market_df.sort_values(["ticker", "date"])
     market_df["spot_t-1"] = market_df.groupby("ticker")["spot_price"].shift(1)
     market_df["vol_t-1"] = market_df.groupby("ticker")["implied_vol"].shift(1)
@@ -34,11 +34,10 @@ def compute_daily_pnl_explained(positions_df, market_df, pnl_df):
             delta_pnl = delta * delta_s
             gamma_pnl = 0.5 * gamma * delta_s ** 2
             vega_pnl = vega * delta_vol
-            theta_pnl = theta * 1  # assume 1-day decay
+            theta_pnl = theta * 1
 
             explained = (delta_pnl + gamma_pnl + vega_pnl + theta_pnl) * pos
 
-            # Merge with actual P&L
             actual_row = pnl_df[(pnl_df["date"] == date) & (pnl_df["trade_id"] == trade_id)]
             actual_pnl = actual_row["actual_pnl"].values[0] if not actual_row.empty else None
 
@@ -62,10 +61,12 @@ def compute_daily_pnl_explained(positions_df, market_df, pnl_df):
     return pd.DataFrame(records)
 
 def main():
-    positions_df, market_df, pnl_df = load_data()
+    data_dir = "data"
+    output_file = os.path.join(data_dir, "explained_pnl_timeseries.csv")
+    positions_df, market_df, pnl_df = load_data(data_dir)
     explained_df = compute_daily_pnl_explained(positions_df, market_df, pnl_df)
-    explained_df.to_csv("explained_pnl_timeseries.csv", index=False)
-    print("✅ Multi-day attribution saved to explained_pnl_timeseries.csv")
+    explained_df.to_csv(output_file, index=False)
+    print(f"✅ Multi-day attribution saved to {output_file}")
 
 if __name__ == "__main__":
     main()
