@@ -27,6 +27,7 @@ def compute_attribution(positions_df, market_df, pnl_df):
     df['explained_pnl'] = df['explained_pnl_per_unit'] * df['position']
     final_df = df.merge(pnl_df, on='trade_id')
     final_df['residual'] = final_df['actual_pnl'] - final_df['explained_pnl']
+    final_df['direction'] = final_df['position'].apply(lambda x: 'long' if x > 0 else 'short')
     return final_df
 
 def summarize_by_group(df, groupby_col="ticker"):
