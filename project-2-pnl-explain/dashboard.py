@@ -1,17 +1,19 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+import os
 
 # Load data
 @st.cache_data
 def load_data():
-    df = pd.read_csv("explained_pnl_timeseries.csv", parse_dates=["date"])
+    path = os.path.join("data", "explained_pnl_timeseries.csv")
+    df = pd.read_csv(path, parse_dates=["date"])
     df["long_short"] = df["position"].apply(lambda x: "Long" if x > 0 else "Short")
     return df
 
 df = load_data()
 
-st.title("Multi-Day P&L Attribution Dashboard")
+st.title("📈 Multi-Day P&L Attribution Dashboard")
 
 # Sidebar filters
 st.sidebar.header("🔍 Filters")
@@ -42,7 +44,7 @@ grouped = (
     .reset_index()
 )
 
-# Line chart: Actual vs Explained
+# Line chart
 st.subheader(f"📅 Daily Actual vs Explained P&L by {group_key}")
 line_chart = alt.Chart(grouped).mark_line().encode(
     x="date:T",
@@ -56,7 +58,7 @@ line_chart = alt.Chart(grouped).mark_line().encode(
 
 st.altair_chart(line_chart, use_container_width=True)
 
-# Bar chart: Greeks Contribution
+# Greek chart
 st.subheader(f"📊 Daily Greek Breakdown by {group_key}")
 greek_chart = alt.Chart(grouped).transform_fold(
     ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"],
@@ -71,8 +73,8 @@ greek_chart = alt.Chart(grouped).transform_fold(
 
 st.altair_chart(greek_chart, use_container_width=True)
 
-# Residual heatmap
-st.subheader(f"Residual P&L Heatmap by {group_key} and Date")
+# Heatmap
+st.subheader(f"🧯 Residual P&L Heatmap by {group_key} and Date")
 heatmap = alt.Chart(grouped).mark_rect().encode(
     x=alt.X("date:T", title="Date"),
     y=alt.Y(f"{group_key}:N", title=group_key.capitalize()),
