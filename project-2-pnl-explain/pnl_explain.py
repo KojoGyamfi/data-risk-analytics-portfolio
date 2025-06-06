@@ -56,13 +56,29 @@ def compute_attribution(positions_df, market_df, pnl_df):
         'explained_pnl', 'actual_pnl', 'residual'
     ]].round(2)
 
-    return output
+    return output, final_df
+
+def summarise_portfolio(final_df):
+    """Print a summary of total actual vs. explained P&L at portfolio level."""
+    summary = {
+        'Total Actual P&L': round(final_df["actual_pnl"].sum(), 2),
+        'Total Explained P&L': round(final_df["explained_pnl"].sum(), 2),
+        'Total Residual': round(final_df["residual"].sum(), 2),
+        'Delta P&L': round((final_df["delta_pnl"] * final_df["position"]).sum(), 2),
+        'Gamma P&L': round((final_df["gamma_pnl"] * final_df["position"]).sum(), 2),
+        'Vega P&L': round((final_df["vega_pnl"] * final_df["position"]).sum(), 2),
+        'Theta P&L': round((final_df["theta_pnl"] * final_df["position"]).sum(), 2)
+    }
+    print("\n📊 Portfolio-Level P&L Summary:")
+    for k, v in summary.items():
+        print(f"{k:<25}: £{v}")
 
 def main():
     positions, market, actual_pnl = load_data()
-    explained_df = compute_attribution(positions, market, actual_pnl)
+    explained_df, final_df = compute_attribution(positions, market, actual_pnl)
     explained_df.to_csv("explained_pnl_output.csv", index=False)
     print("✅ Attribution complete. Output saved to explained_pnl_output.csv")
+    summarize_portfolio(final_df)
 
 if __name__ == "__main__":
     main()
