@@ -1,4 +1,5 @@
 import streamlit as st
+import plotly.express as px
 from pnl_model import load_data, compute_attribution, summarize_by_group
 
 st.set_page_config(page_title="P&L Explain Tool", layout="wide")
@@ -23,6 +24,17 @@ summary_df = summarize_by_group(df, groupby_col=group_option)
 # Show group-level results
 st.subheader(f"📂 Group-Level P&L Summary by {group_option.capitalize()}")
 st.dataframe(summary_df, use_container_width=True)
+
+# Plot: Actual vs Explained P&L by selected group
+plot_df = summary_df.melt(id_vars=group_option, 
+                          value_vars=["Actual P&L", "Explained P&L"],
+                          var_name="P&L Type", value_name="P&L Value")
+
+fig = px.bar(plot_df, 
+             x=group_option, y="P&L Value", color="P&L Type", 
+             barmode="group", title=f"Actual vs Explained P&L by {group_option.capitalize()}")
+
+st.plotly_chart(fig, use_container_width=True)
 
 # Download
 csv = summary_df.to_csv(index=False).encode('utf-8')
