@@ -1,10 +1,10 @@
 import pandas as pd
 
-def load_data():
-    """Load positions, market data, and actual P&L from CSV files."""
-    positions = pd.read_csv("positions.csv")
-    market = pd.read_csv("market_data.csv")
-    actual_pnl = pd.read_csv("pnl_actuals.csv")
+def load_data(data_dir="data"):
+    """Load positions, market data, and actual P&L from CSV files in specified directory."""
+    positions = pd.read_csv(f"{data_dir}/positions.csv")
+    market = pd.read_csv(f"{data_dir}/market_data.csv")
+    actual_pnl = pd.read_csv(f"{data_dir}/pnl_actuals.csv")
     return positions, market, actual_pnl
 
 def compute_attribution(positions_df, market_df, pnl_df):
