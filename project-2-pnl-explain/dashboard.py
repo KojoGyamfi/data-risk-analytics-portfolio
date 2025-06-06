@@ -1,41 +1,83 @@
 import streamlit as st
-import plotly.express as px
-from pnl_model import load_data, compute_attribution, summarize_by_group
+import pandas as pd
+import altair as alt
 
-st.set_page_config(page_title="P&L Explain Tool", layout="wide")
-st.title("📊 P&L Attribution Dashboard")
+# Load data
+@st.cache_data
+def load_data():
+    df = pd.read_csv("explained_pnl_timeseries.csv", parse_dates=["date"])
+    df["long_short"] = df["position"].apply(lambda x: "Long" if x > 0 else "Short")
+    return df
 
-# Load and compute
-positions, market, actuals = load_data(data_dir="data")
-df = compute_attribution(positions, market, actuals)
+df = load_data()
 
-# Show raw position-level P&L
-st.subheader("🔍 Position-Level P&L Attribution")
-st.dataframe(df[[
-    'trade_id', 'ticker', 'instrument_type', 'direction', 'position',
-    'delta_pnl', 'gamma_pnl', 'vega_pnl', 'theta_pnl',
-    'explained_pnl', 'actual_pnl', 'residual'
-]].round(2), use_container_width=True)
+st.title("Multi-Day P&L Attribution Dashboard")
 
-# Grouping options
-group_option = st.selectbox("Group P&L by:", ["ticker", "instrument_type", "direction"])
-summary_df = summarize_by_group(df, groupby_col=group_option)
+# Sidebar filters
+st.sidebar.header("🔍 Filters")
+group_key = st.sidebar.selectbox("Group by", ["ticker", "sector", "region", "long_short"])
+date_range = st.sidebar.date_input(
+    "Select date range",
+    [df["date"].min(), df["date"].max()],
+    min_value=df["date"].min(),
+    max_value=df["date"].max()
+)
 
-# Show group-level results
-st.subheader(f"📂 Group-Level P&L Summary by {group_option.capitalize()}")
-st.dataframe(summary_df, use_container_width=True)
+# Filtered data
+mask = (df["date"] >= pd.to_datetime(date_range[0])) & (df["date"] <= pd.to_datetime(date_range[1]))
+filtered_df = df[mask]
 
-# Plot: Actual vs Explained P&L by selected group
-plot_df = summary_df.melt(id_vars=group_option, 
-                          value_vars=["Actual P&L", "Explained P&L"],
-                          var_name="P&L Type", value_name="P&L Value")
+# Grouped summary
+grouped = (
+    filtered_df.groupby(["date", group_key])
+    .agg({
+        "explained_pnl": "sum",
+        "actual_pnl": "sum",
+        "delta_pnl": "sum",
+        "gamma_pnl": "sum",
+        "vega_pnl": "sum",
+        "theta_pnl": "sum",
+        "residual": "sum"
+    })
+    .reset_index()
+)
 
-fig = px.bar(plot_df, 
-             x=group_option, y="P&L Value", color="P&L Type", 
-             barmode="group", title=f"Actual vs Explained P&L by {group_option.capitalize()}")
+# Line chart: Actual vs Explained
+st.subheader(f"📅 Daily Actual vs Explained P&L by {group_key}")
+line_chart = alt.Chart(grouped).mark_line().encode(
+    x="date:T",
+    y=alt.Y("value:Q", title="P&L"),
+    color="metric:N",
+    tooltip=["date:T", group_key, "value:Q"]
+).transform_fold(
+    ["actual_pnl", "explained_pnl"],
+    as_=["metric", "value"]
+).properties(width=800, height=400)
 
-st.plotly_chart(fig, use_container_width=True)
+st.altair_chart(line_chart, use_container_width=True)
 
-# Download
-csv = summary_df.to_csv(index=False).encode('utf-8')
-st.download_button("Download Group Summary CSV", data=csv, file_name="pnl_summary.csv", mime="text/csv")
+# Bar chart: Greeks Contribution
+st.subheader(f"📊 Daily Greek Breakdown by {group_key}")
+greek_chart = alt.Chart(grouped).transform_fold(
+    ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"],
+    as_=["Greek", "value"]
+).mark_bar().encode(
+    x=alt.X("date:T", title="Date"),
+    y=alt.Y("value:Q", title="P&L"),
+    color="Greek:N",
+    column=group_key,
+    tooltip=["Greek", "value:Q"]
+).properties(width=150)
+
+st.altair_chart(greek_chart, use_container_width=True)
+
+# Residual heatmap
+st.subheader(f"Residual P&L Heatmap by {group_key} and Date")
+heatmap = alt.Chart(grouped).mark_rect().encode(
+    x=alt.X("date:T", title="Date"),
+    y=alt.Y(f"{group_key}:N", title=group_key.capitalize()),
+    color=alt.Color("residual:Q", scale=alt.Scale(scheme="redblue"), title="Residual"),
+    tooltip=["date:T", group_key, "residual:Q"]
+).properties(width=800, height=400)
+
+st.altair_chart(heatmap, use_container_width=True)
