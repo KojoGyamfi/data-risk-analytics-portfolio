@@ -3,14 +3,24 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 
-# === Sector Driver ===
+# === Generate Only Weekday Dates ===
+def generate_trading_days(start_date, num_days_required):
+    dates = []
+    current = start_date
+    while len(dates) < num_days_required:
+        if current.weekday() < 5:  # 0 = Monday, ..., 4 = Friday
+            dates.append(current)
+        current += timedelta(days=1)
+    return dates
+
+# === Generate Sector-Wide Price Drivers ===
 def generate_sector_drivers(sectors, num_days):
     return {
         sector: np.cumsum(np.random.normal(0, 1, num_days))
         for sector in sectors
     }
 
-# === Market Data Generation ===
+# === Generate Market Data ===
 def generate_market_data(tickers, sector_drivers, dates, output_path):
     market_data = []
     num_days = len(dates)
@@ -40,7 +50,7 @@ def generate_market_data(tickers, sector_drivers, dates, output_path):
     df.to_csv(output_path, index=False)
     return df
 
-# === Position Generation ===
+# === Generate Portfolio Positions ===
 def generate_positions(tickers, start_date, num_trades, output_path):
     positions = []
     ticker_list = list(tickers.keys())
@@ -72,7 +82,7 @@ def generate_positions(tickers, start_date, num_trades, output_path):
     df.to_csv(output_path, index=False)
     return df
 
-# === Daily Actual P&L Simulation ===
+# === Simulate Daily Actual P&L ===
 def simulate_actual_pnl(positions, market_df, output_path):
     records = []
 
@@ -120,7 +130,7 @@ def main():
 
     start_date = datetime(2025, 6, 1)
     num_days = 30
-    dates = [start_date + timedelta(days=i) for i in range(num_days)]
+    dates = generate_trading_days(start_date, num_days)
 
     tickers = {
         "AAPL": ("Tech", "US"), "MSFT": ("Tech", "US"), "AMZN": ("Tech", "US"), "SSNLF": ("Tech", "Asia"),
@@ -131,13 +141,14 @@ def main():
         "JNJ": ("Healthcare", "US"), "PFE": ("Healthcare", "US"), "AZN": ("Healthcare", "Europe")
     }
 
-    sector_drivers = generate_sector_drivers(set(sector for sector, _ in tickers.values()), num_days)
+    sectors = set(sector for sector, _ in tickers.values())
+    sector_drivers = generate_sector_drivers(sectors, num_days)
 
     market_df = generate_market_data(tickers, sector_drivers, dates, f"{output_dir}/market_data.csv")
-    positions_df = generate_positions(tickers, start_date, 50, f"{output_dir}/positions.csv")
+    positions_df = generate_positions(tickers, dates[0], 50, f"{output_dir}/positions.csv")
     simulate_actual_pnl(positions_df.to_dict("records"), market_df, f"{output_dir}/pnl_actuals.csv")
 
-    print("✅ Synthetic data generated and saved to /data")
+    print("✅ Synthetic data generated (weekdays only) and saved to 'data/'")
 
 # === Entry Point ===
 if __name__ == "__main__":
