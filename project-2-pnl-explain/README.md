@@ -11,7 +11,7 @@ Help traders and risk managers understand what drove their daily P&L and identif
 
 **Scope:**  
 - Derivatives positions (calls, puts, delta-one)
-- Greek sensitivities (Δ, Γ, Vega, Θ)
+- Greek sensitivities (Delta, Gamma, Vega, Theta)
 - Market data (spot and implied vol)
 - Actual realized P&L
 - Explained vs. unexplained breakdown
