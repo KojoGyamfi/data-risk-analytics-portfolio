@@ -1,78 +1,144 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+import os
 
-def generate_market_data(tickers, dates):
+# === Sector Driver ===
+def generate_sector_drivers(sectors, num_days):
+    return {
+        sector: np.cumsum(np.random.normal(0, 1, num_days))
+        for sector in sectors
+    }
+
+# === Market Data Generation ===
+def generate_market_data(tickers, sector_drivers, dates, output_path):
     market_data = []
-    for ticker in tickers:
-        spot_t1 = np.random.uniform(100, 300)
-        spot_t2 = spot_t1 * np.random.uniform(0.98, 1.05)
-        vol_t1 = np.random.uniform(0.2, 0.4)
-        vol_t2 = vol_t1 * np.random.uniform(0.95, 1.1)
-        market_data.extend([
-            {'date': dates[0], 'ticker': ticker, 'spot_price': round(spot_t1, 2), 'implied_vol': round(vol_t1, 4)},
-            {'date': dates[1], 'ticker': ticker, 'spot_price': round(spot_t2, 2), 'implied_vol': round(vol_t2, 4)}
-        ])
-    return pd.DataFrame(market_data)
+    num_days = len(dates)
 
-def generate_positions(tickers, market_df, n=20):
-    instrument_types = ['call', 'put']
+    for ticker, (sector, _) in tickers.items():
+        base_price = np.random.uniform(80, 150)
+        base_vol = np.random.uniform(0.2, 0.5)
+        sector_path = sector_drivers[sector]
+        noise = np.random.normal(0, 1, num_days)
+        vol_shock = np.random.normal(0, 0.02, num_days)
+
+        spot = base_price + sector_path + 0.5 * noise
+        vol = np.clip(
+            base_vol + 0.1 * np.sin(np.linspace(0, 3.14, num_days)) + vol_shock,
+            0.15, 0.8
+        )
+
+        for i, date in enumerate(dates):
+            market_data.append({
+                "date": date.strftime("%Y-%m-%d"),
+                "ticker": ticker,
+                "spot_price": round(spot[i], 2),
+                "implied_vol": round(vol[i], 4)
+            })
+
+    df = pd.DataFrame(market_data)
+    df.to_csv(output_path, index=False)
+    return df
+
+# === Position Generation ===
+def generate_positions(tickers, start_date, num_trades, output_path):
     positions = []
-    for i in range(n):
-        ticker = np.random.choice(tickers)
-        instrument = np.random.choice(instrument_types)
-        position = np.random.randint(-200, 200)
-        delta = np.random.uniform(-1, 1)
-        gamma = np.random.uniform(0.01, 0.05)
-        vega = np.random.uniform(0.05, 0.2)
-        theta = np.random.uniform(-0.05, 0)
-        price = np.random.uniform(2, 10)
-        implied_vol = market_df[(market_df['ticker'] == ticker) & (market_df['date'] == '2025-06-01')]['implied_vol'].values[0]
+    ticker_list = list(tickers.keys())
+    option_types = ["call", "put"]
+
+    for trade_id in range(1, num_trades + 1):
+        ticker = np.random.choice(ticker_list)
+        sector, region = tickers[ticker]
+        position = np.random.choice([-1, 1]) * np.random.randint(10, 200)
+        option_type = np.random.choice(option_types)
+        maturity_offset = np.random.randint(15, 90)
+        maturity_date = (start_date + timedelta(days=maturity_offset)).strftime("%Y-%m-%d")
+
         positions.append({
-            'trade_id': f'T{i+1}',
-            'date': '2025-06-01',
-            'ticker': ticker,
-            'instrument_type': instrument,
-            'position': position,
-            'delta': round(delta, 4),
-            'gamma': round(gamma, 4),
-            'vega': round(vega, 4),
-            'theta': round(theta, 4),
-            'price_t-1': round(price, 2),
-            'implied_vol_t-1': round(implied_vol, 4)
+            "trade_id": trade_id,
+            "ticker": ticker,
+            "sector": sector,
+            "region": region,
+            "option_type": option_type,
+            "position": position,
+            "delta": round(np.random.uniform(-1.5, 1.5), 3),
+            "gamma": round(np.random.uniform(0.01, 0.3), 3),
+            "vega": round(np.random.uniform(-1.0, 1.0), 3),
+            "theta": round(np.random.uniform(-0.5, 0.5), 3),
+            "maturity_date": maturity_date
         })
-    return pd.DataFrame(positions)
 
-def generate_actual_pnl(positions_df, market_df):
-    pnl_data = []
-    for _, row in positions_df.iterrows():
-        spot_prices = market_df[market_df['ticker'] == row['ticker']].sort_values(by='date')
-        delta_pnl = row['delta'] * (spot_prices.iloc[1]['spot_price'] - spot_prices.iloc[0]['spot_price'])
-        gamma_pnl = 0.5 * row['gamma'] * (spot_prices.iloc[1]['spot_price'] - spot_prices.iloc[0]['spot_price'])**2
-        vega_pnl = row['vega'] * (spot_prices.iloc[1]['implied_vol'] - spot_prices.iloc[0]['implied_vol'])
-        theta_pnl = row['theta'] * 1
-        noise = np.random.normal(0, 2)
-        actual_pnl = (delta_pnl + gamma_pnl + vega_pnl + theta_pnl + noise) * row['position']
-        pnl_data.append({
-            'trade_id': row['trade_id'],
-            'date': '2025-06-02',
-            'actual_pnl': round(actual_pnl, 2)
-        })
-    return pd.DataFrame(pnl_data)
+    df = pd.DataFrame(positions)
+    df.to_csv(output_path, index=False)
+    return df
 
-def generate_all_data():
+# === Daily Actual P&L Simulation ===
+def simulate_actual_pnl(positions, market_df, output_path):
+    records = []
+
+    for trade in positions:
+        ticker = trade["ticker"]
+        pos = trade["position"]
+        delta = trade["delta"]
+        gamma = trade["gamma"]
+        vega = trade["vega"]
+        theta = trade["theta"]
+        trade_id = trade["trade_id"]
+
+        market = market_df[market_df["ticker"] == ticker].copy()
+        market["spot_t-1"] = market["spot_price"].shift(1)
+        market["vol_t-1"] = market["implied_vol"].shift(1)
+        market = market.dropna()
+
+        for _, row in market.iterrows():
+            delta_s = row["spot_price"] - row["spot_t-1"]
+            delta_vol = row["implied_vol"] - row["vol_t-1"]
+            explained = (
+                delta * delta_s +
+                0.5 * gamma * delta_s**2 +
+                vega * delta_vol +
+                theta * 1
+            ) * pos
+
+            actual = explained + np.random.normal(0, 5)
+
+            records.append({
+                "date": row["date"],
+                "trade_id": trade_id,
+                "actual_pnl": round(actual, 2)
+            })
+
+    df = pd.DataFrame(records)
+    df.to_csv(output_path, index=False)
+    return df
+
+# === Main Runner ===
+def main():
     np.random.seed(42)
-    tickers = ['AAPL', 'TSLA', 'SPY', 'MSFT', 'NVDA']
-    dates = ['2025-06-01', '2025-06-02']
+    output_dir = "data"
+    os.makedirs(output_dir, exist_ok=True)
 
-    market_df = generate_market_data(tickers, dates)
-    positions_df = generate_positions(tickers, market_df)
-    pnl_df = generate_actual_pnl(positions_df, market_df)
+    start_date = datetime(2025, 6, 1)
+    num_days = 30
+    dates = [start_date + timedelta(days=i) for i in range(num_days)]
 
-    return market_df, positions_df, pnl_df
+    tickers = {
+        "AAPL": ("Tech", "US"), "MSFT": ("Tech", "US"), "AMZN": ("Tech", "US"), "SSNLF": ("Tech", "Asia"),
+        "SHEL": ("Energy", "Europe"), "BP": ("Energy", "Europe"), "XOM": ("Energy", "US"),
+        "TSLA": ("Auto", "US"), "TM": ("Auto", "Asia"), "MBGYY": ("Auto", "Europe"),
+        "HSBC": ("Financials", "Europe"),
+        "BABA": ("Consumer", "Asia"), "PG": ("FMCG", "US"), "ULVR": ("FMCG", "Europe"), "KO": ("FMCG", "US"),
+        "JNJ": ("Healthcare", "US"), "PFE": ("Healthcare", "US"), "AZN": ("Healthcare", "Europe")
+    }
 
-# Save to CSV
-market_df, positions_df, pnl_df = generate_all_data()
-market_df.to_csv("/mnt/data/market_data.csv", index=False)
-positions_df.to_csv("/mnt/data/positions.csv", index=False)
-pnl_df.to_csv("/mnt/data/pnl_actuals.csv", index=False)
+    sector_drivers = generate_sector_drivers(set(sector for sector, _ in tickers.values()), num_days)
 
+    market_df = generate_market_data(tickers, sector_drivers, dates, f"{output_dir}/market_data.csv")
+    positions_df = generate_positions(tickers, start_date, 50, f"{output_dir}/positions.csv")
+    simulate_actual_pnl(positions_df.to_dict("records"), market_df, f"{output_dir}/pnl_actuals.csv")
+
+    print("✅ Synthetic data generated and saved to /data")
+
+# === Entry Point ===
+if __name__ == "__main__":
+    main()
