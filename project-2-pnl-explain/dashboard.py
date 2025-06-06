@@ -66,12 +66,13 @@ greek_chart = alt.Chart(grouped).transform_fold(
 ).mark_bar().encode(
     x=alt.X("date:T", title="Date"),
     y=alt.Y("value:Q", title="P&L"),
-    color="Greek:N",
-    column=group_key,
-    tooltip=["Greek", "value:Q"]
+    color=alt.Color("Greek:N", title="Greek"),
+    column=alt.Column(f"{group_key}:N", title=group_key.capitalize()),
+    tooltip=["Greek:N", "value:Q"]
 ).properties(width=150)
 
 st.altair_chart(greek_chart, use_container_width=True)
+
 
 # Heatmap
 st.subheader(f"🧯 Residual P&L Heatmap by {group_key} and Date")
