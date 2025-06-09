@@ -1,6 +1,6 @@
 # Data & Risk Analytics Portfolio
 
-Welcome to my project portfolio showcasing tools and analytics developed for a Data & Risk Analytics Consultancy business.
+Welcome to my project portfolio showcasing tools and analytics.
 
 Each project is built around practical use cases in financial markets, risk management, and data infrastructure.
 
