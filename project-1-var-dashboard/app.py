@@ -11,7 +11,7 @@ from io import BytesIO
 # Page Setup
 # --------------------------
 st.set_page_config(page_title="Real Portfolio VaR Dashboard", layout="wide")
-st.title("📊 Daily VaR & Risk Dashboard – Real Portfolio")
+st.title("Daily VaR & Risk Dashboard – Real Portfolio")
 
 # --------------------------
 # Sidebar Inputs
@@ -141,7 +141,7 @@ csv = convert_df_to_csv(report_df)
 # --------------------------
 # Dashboard Display
 # --------------------------
-st.subheader("🔐 Portfolio Risk Summary")
+st.subheader("Portfolio Risk Summary")
 
 col1, col2 = st.columns(2)
 col1.metric(label=f"{int(confidence_level*100)}% Parametric VaR", value=f"{parametric_var:.2%}")
@@ -158,10 +158,10 @@ if parametric_var > 0.03 or historical_var > 0.03:
 
 st.download_button("📥 Download Risk Summary (CSV)", data=csv, file_name="risk_report.csv", mime='text/csv')
 
-st.subheader("📉 Rolling Volatility")
+st.subheader("Rolling Volatility")
 st.line_chart(portfolio_returns.rolling(vol_window).std())
 
-st.subheader("📈 Return Distribution")
+st.subheader("Return Distribution")
 fig, ax = plt.subplots()
 portfolio_returns.hist(bins=50, ax=ax, color='skyblue', edgecolor='black')
 ax.axvline(-parametric_var, color='red', linestyle='--', label='Parametric VaR')
