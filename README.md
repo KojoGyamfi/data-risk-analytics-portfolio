@@ -4,7 +4,7 @@ Welcome to my project portfolio showcasing tools and analytics.
 
 Each project is built around practical use cases in financial markets, risk management, and data infrastructure.
 
-## 🔍 Projects
+## Projects
 
 1. **[VaR Dashboard for Multi-Asset Portfolios](./project-1-var-dashboard)**  
    Visualizes VaR, rolling volatility, and exposure breakdowns using Streamlit/Tableau.
