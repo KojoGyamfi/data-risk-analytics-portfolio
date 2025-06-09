@@ -3,11 +3,10 @@ import pandas as pd
 import altair as alt
 import os
 
-# Load data
+# Load Data
 @st.cache_data
 def load_data():
-    path = os.path.join("data", "explained_pnl_timeseries.csv")
-    df = pd.read_csv(path, parse_dates=["date"])
+    df = pd.read_csv(os.path.join("data", "explained_pnl_timeseries.csv"), parse_dates=["date"])
     df["long_short"] = df["position"].apply(lambda x: "Long" if x > 0 else "Short")
     return df
 
@@ -25,7 +24,7 @@ date_range = st.sidebar.date_input(
     max_value=df["date"].max()
 )
 
-# Filtered data
+# Filter data
 mask = (df["date"] >= pd.to_datetime(date_range[0])) & (df["date"] <= pd.to_datetime(date_range[1]))
 filtered_df = df[mask]
 
@@ -33,54 +32,51 @@ filtered_df = df[mask]
 grouped = (
     filtered_df.groupby(["date", group_key])
     .agg({
-        "explained_pnl": "sum",
         "actual_pnl": "sum",
+        "explained_pnl": "sum",
+        "residual": "sum",
         "delta_pnl": "sum",
         "gamma_pnl": "sum",
         "vega_pnl": "sum",
-        "theta_pnl": "sum",
-        "residual": "sum"
+        "theta_pnl": "sum"
     })
     .reset_index()
 )
 
-# Line chart
-st.subheader(f"📅 Daily Actual vs Explained P&L by {group_key}")
-line_chart = alt.Chart(grouped).mark_line().encode(
-    x="date:T",
-    y=alt.Y("value:Q", title="P&L"),
-    color="metric:N",
-    tooltip=["date:T", group_key, "value:Q"]
-).transform_fold(
-    ["actual_pnl", "explained_pnl"],
-    as_=["metric", "value"]
-).properties(width=800, height=400)
+# === Section 1: Table - Daily Actual vs Explained PnL ===
+st.subheader(f"📊 Daily Actual vs Explained P&L by {group_key}")
 
-st.altair_chart(line_chart, use_container_width=True)
+summary_df = grouped[["date", group_key, "actual_pnl", "explained_pnl", "residual"]].copy()
+summary_df = summary_df.sort_values("date", ascending=False)
+summary_df[["actual_pnl", "explained_pnl", "residual"]] = summary_df[
+    ["actual_pnl", "explained_pnl", "residual"]
+].round(2)
 
-# Greek chart
-st.subheader(f"📊 Daily Greek Breakdown by {group_key}")
-greek_chart = alt.Chart(grouped).transform_fold(
+st.dataframe(summary_df, use_container_width=True)
+
+# === Section 2: Table - Greek Breakdown ===
+st.subheader(f"🧮 Daily Greek Attribution by {group_key}")
+
+greek_df = grouped[["date", group_key, "delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]].copy()
+greek_df = greek_df.sort_values("date", ascending=False)
+greek_df[["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]] = greek_df[
+    ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]
+].round(2)
+
+st.dataframe(greek_df, use_container_width=True)
+
+# === Section 3: Area Chart - Greek Attribution Over Time ===
+st.subheader(f"📉 Stacked Area Chart of Greek Attribution by {group_key}")
+
+area_chart = alt.Chart(grouped).transform_fold(
     ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"],
     as_=["Greek", "value"]
-).mark_bar().encode(
+).mark_area(opacity=0.7).encode(
     x=alt.X("date:T", title="Date"),
     y=alt.Y("value:Q", title="P&L"),
     color=alt.Color("Greek:N", title="Greek"),
-    column=alt.Column(f"{group_key}:N", title=group_key.capitalize()),
-    tooltip=["Greek:N", "value:Q"]
-).properties(width=150)
+    tooltip=["date:T", "Greek:N", "value:Q"],
+    facet=alt.Facet(f"{group_key}:N", columns=3, title=None)
+).properties(width=250, height=200)
 
-st.altair_chart(greek_chart, use_container_width=True)
-
-
-# Heatmap
-st.subheader(f"🧯 Residual P&L Heatmap by {group_key} and Date")
-heatmap = alt.Chart(grouped).mark_rect().encode(
-    x=alt.X("date:T", title="Date"),
-    y=alt.Y(f"{group_key}:N", title=group_key.capitalize()),
-    color=alt.Color("residual:Q", scale=alt.Scale(scheme="redblue"), title="Residual"),
-    tooltip=["date:T", group_key, "residual:Q"]
-).properties(width=800, height=400)
-
-st.altair_chart(heatmap, use_container_width=True)
+st.altair_chart(area_chart, use_container_width=True)
