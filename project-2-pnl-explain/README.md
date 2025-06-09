@@ -1,21 +1,21 @@
-# 📊 P&L Attribution Tool
+# P&L Attribution Tool
 
 This tool provides multi-day explained vs actual P&L attribution for a portfolio of options across multiple sectors and regions. It decomposes P&L into Greeks (Delta, Gamma, Vega, Theta), supports trade-level drilldowns, and visualizes attribution trends over time.
 
 ---
 
-## 🔧 Features
+## Features
 
-- 🗂️ Group-by views: Sector, Region, Ticker, Long/Short
-- 🕒 Multi-day attribution across 30 trading days
-- 📈 Cumulative P&L trends (Actual vs Explained)
-- 📉 Daily Greek breakdown (tabular + stacked area chart)
-- 🔍 Trade-level drilldown by group
-- 🧮 Residual analysis: Actual - Explained P&L
+- Group-by views: Sector, Region, Ticker, Long/Short
+- Multi-day attribution across 30 trading days
+- Cumulative P&L trends (Actual vs Explained)
+- Daily Greek breakdown (tabular + stacked area chart)
+- Trade-level drilldown by group
+- Residual analysis: Actual - Explained P&L
 
 ---
 
-## 📁 File Structure
+## File Structure
 
 ```
 project/
@@ -31,7 +31,7 @@ project/
 
 ---
 
-## ▶️ Usage
+## Usage
 
 ```bash
 # Step 1: Install dependencies
@@ -46,7 +46,7 @@ streamlit run dashboard.py
 
 ---
 
-## 🧪 Methodology
+## Methodology
 
 The explained P&L is computed using a Taylor expansion-based approximation:
 
@@ -63,19 +63,10 @@ Residual = Actual P&L − Explained P&L
 
 ---
 
-## 📈 Dashboard Preview
+## Dashboard Preview
 
 - **Summary Tables**: Actual vs Explained P&L by group
 - **Greek Attribution**: Table + stacked area chart
 - **Cumulative View**: Trends of explained vs actual P&L
 - **Drilldown**: Inspect trades by ticker, sector, or region
 
----
-
-## ✅ TODO / Future Features
-
-- Residual heatmaps
-- Alerts on unexplained residual spikes
-- Filters for maturity and option type
-- Download/export filtered data
-- Residual decomposition by driver (vol skew, cross gamma, etc.)
