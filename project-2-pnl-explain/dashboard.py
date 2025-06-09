@@ -90,7 +90,7 @@ colnames = {
     "theta_pnl": "Theta P&L"
 }
 
-greek_df = greek_df.rename(columns=nice_colnames)
+greek_df = greek_df.rename(columns=colnames)
 
 st.dataframe(greek_df, use_container_width=True)
 
