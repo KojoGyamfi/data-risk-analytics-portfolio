@@ -1,38 +1,37 @@
-#  P&L Explain Tool – Equity Derivatives Edition
+# P&L Attribution Tool
 
-This tool is designed to perform P&L attribution for an equity derivatives trading book using Greek-based sensitivity analysis. It enables users to decompose daily P&L into key explanatory factors such as Delta, Gamma, Vega, and Theta, and compare these to actual realized P&L for validation and analysis.
-
----
-
-##  Project Overview
-
-**Goal:**  
-Help traders and risk managers understand what drove their daily P&L and identify unexplained components.
-
-**Scope:**  
-- Derivatives positions (calls, puts, delta-one)
-- Greek sensitivities (Delta, Gamma, Vega, Theta)
-- Market data (spot and implied vol)
-- Actual realized P&L
-- Explained vs. unexplained breakdown
+This tool provides multi-day explained vs actual P&L attribution for a portfolio of options across multiple sectors and regions. It decomposes P&L into Greeks (Delta, Gamma, Vega, Theta), supports trade-level drilldowns, and visualizes attribution trends over time.
 
 ---
 
-##  Project Structure
+## Features
+
+-  Group-by views: Sector, Region, Ticker, Long/Short
+-  Multi-day attribution across 30 trading days
+-  Cumulative P&L trends (Actual vs Explained)
+-  Daily Greek breakdown (tabular + stacked area chart)
+-  Trade-level drilldown by group
+-  Residual analysis: Actual - Explained P&L
+
+---
+
+## File Structure
+
+
 
 - `data/`
-  - `market_data.csv` — Spot and vol data for 5 underlyings across 2 days
-  - `positions.csv` — Position-level exposures with Greek sensitivities
-  - `pnl_actuals.csv` — Realized daily P&L per trade
+  - `explained_pnl_timeseries.csv` 
+  - `market_data.csv` 
+  - `positions.csv` 
+  - `pnl_actuals.csv` 
 
-- `pnl_explain.py` — Core attribution logic using first- and second-order Greeks
+- `pnl_model.py` 
 
-- `dashboard.py` (optional) — Interactive Streamlit dashboard (to be developed)
+- `dashboard.py` 
 
-- `README.md` — Project documentation
+- `generate_synthetic_data.py` 
 
-- `requirements.txt` — Dependencies
-
+- `case_study.md` 
 ---
 
 ##  Attribution Methodology
