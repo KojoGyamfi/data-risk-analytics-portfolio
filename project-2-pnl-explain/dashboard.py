@@ -56,6 +56,8 @@ summary_df[["actual_pnl", "explained_pnl", "residual"]] = summary_df[
 colnames = {
     "date": "Date",
     group_key: group_key.replace("_", " ").title(),
+    "trade_id": "Trade ID",
+    "position": "Position",
     "actual_pnl": "Actual P&L",
     "explained_pnl": "Explained P&L",
     "residual": "Residual",
