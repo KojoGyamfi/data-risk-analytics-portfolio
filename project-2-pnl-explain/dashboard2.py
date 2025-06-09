@@ -44,7 +44,7 @@ grouped = (
 )
 
 # === Section 1: Table - Daily Actual vs Explained PnL ===
-st.subheader(f"📊 Daily Actual vs Explained P&L by {group_key}")
+st.subheader(f"Daily Actual vs Explained P&L by {group_key}")
 
 summary_df = grouped[["date", group_key, "actual_pnl", "explained_pnl", "residual"]].copy()
 summary_df = summary_df.sort_values("date", ascending=False)
@@ -53,7 +53,7 @@ summary_df[["actual_pnl", "explained_pnl", "residual"]] = summary_df[
 ].round(2)
 
 # Format column names
-nice_colnames = {
+colnames = {
     "date": "Date",
     group_key: group_key.replace("_", " ").title(),
     "actual_pnl": "Actual P&L",
@@ -64,24 +64,24 @@ nice_colnames = {
     "vega_pnl": "Vega P&L",
     "theta_pnl": "Theta P&L"
 }
-summary_df = summary_df.rename(columns=nice_colnames)
+summary_df = summary_df.rename(columns=colnames)
 
 st.dataframe(summary_df, use_container_width=True)
 
 # === Section 2: Table - Greek Breakdown ===
-st.subheader(f"🧮 Daily Greek Attribution by {group_key}")
+st.subheader(f"Daily Greek Attribution by {group_key}")
 
 greek_df = grouped[["date", group_key, "delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]].copy()
 greek_df = greek_df.sort_values("date", ascending=False)
 greek_df[["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]] = greek_df[
     ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]
 ].round(2)
-greek_df = greek_df.rename(columns=nice_colnames)
+greek_df = greek_df.rename(columns=colnames)
 
 st.dataframe(greek_df, use_container_width=True)
 
 # === Section 3: Area Chart - Greek Attribution Over Time ===
-st.subheader(f"📉 Stacked Area Chart of Greek Attribution by {group_key}")
+st.subheader(f"Stacked Area Chart of Greek Attribution by {group_key}")
 
 area_chart = alt.Chart(grouped).transform_fold(
     ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"],
@@ -100,7 +100,7 @@ area_chart = area_chart.facet(
 st.altair_chart(area_chart, use_container_width=True)
 
 # === Section 4: Cumulative P&L Trend ===
-st.subheader(f"📈 Cumulative Actual vs Explained P&L by {group_key}")
+st.subheader(f"Cumulative Actual vs Explained P&L by {group_key}")
 
 cumulative_df = (
     grouped
@@ -139,7 +139,7 @@ cumulative_chart = cumulative_chart.facet(
 st.altair_chart(cumulative_chart, use_container_width=True)
 
 # === Section 5: Drilldown Table ===
-st.subheader(f"🔍 Trade-Level Drilldown by {group_key}")
+st.subheader(f"Trade-Level Drilldown by {group_key}")
 
 group_vals = filtered_df[group_key].dropna().unique()
 selected_group = st.selectbox(f"Select {group_key.replace('_', ' ').title()} to explore", sorted(group_vals))
@@ -152,5 +152,6 @@ cols = [
 ]
 drilldown_df = drilldown_df[cols].sort_values(["date", "trade_id"])
 drilldown_df = drilldown_df.round(2)
+drilldown_df = drilldown_df.rename(columns=colnames)
 
 st.dataframe(drilldown_df, use_container_width=True)
