@@ -1,53 +1,71 @@
-# 🧾 Case Study: Attribution Analysis for Multi-Region Options Book
-
-## 🎯 Objective
-
-A trading risk analyst is tasked with explaining daily and cumulative P&L on a portfolio of equity options spanning Tech, Energy, Healthcare, and FMCG sectors across US, EU, and APAC.
+#  Case Study: Multi-Day P&L Attribution Tool for a Global Options Book
 
 ---
 
-## 🔍 Step 1: Identify Top Contributors
+##  Problem
 
-Using the dashboard:
-- Group by **sector**
-- See that **Tech** and **Energy** had the largest actual and explained P&L
+Risk managers and product controllers often struggle to understand **why** a portfolio’s P&L has moved, especially in volatile conditions or when portfolios span multiple sectors, regions, and instrument types. Traditional reporting lacks the granularity or modeling transparency required to confidently explain daily P&L at scale — particularly for complex derivative books.
 
 ---
 
-## 📉 Step 2: Analyze Greek Attribution
+##  Solution
 
-- In Tech, **Delta** and **Gamma** dominate P&L
-- In Energy, **Vega** is significant — consistent with recent volatility changes
+This project delivers a dynamic, interactive **P&L Attribution Dashboard** built using **Python and Streamlit**. The tool enables users to:
 
----
-
-## ⚠️ Step 3: Spot Residuals
-
-- The residual column shows a growing unexplained P&L in **Healthcare**
-- Drilldown shows it's driven by a set of long Vega positions
-- Possibly due to misestimated vol skew or expiration proximity
-
----
-
-## 📈 Step 4: View Cumulative Trends
-
-- In the cumulative chart, **FMCG** shows divergence between actual and explained — alerts need to be set
-
----
-
-## 🔍 Step 5: Drill Down on Sector
-
-- Analyst selects **Healthcare**
-- Trade-level table shows one trade with large residual on 2025-06-15
-- Analyst can now investigate pricing model assumptions or trade booking
+- Decompose **actual P&L** into **explained P&L** based on Greek sensitivities:
+  - **Delta** × ΔSpot  
+  - **Gamma** × ΔSpot²  
+  - **Vega** × ΔVol  
+  - **Theta** × ΔTime
+- Visualize P&L evolution across:
+  - 30 days of simulated portfolio data
+  - Sectors, regions, tickers, and position direction (long/short)
+- Drill down into:
+  - Trade-level residuals
+  - Daily attribution across all Greeks
+- Track **cumulative trends** in actual vs explained P&L
+- Flag **unexplained residuals** for further investigation
 
 ---
 
-## ✅ Outcome
+##  Technical Highlights
 
-Analyst identifies:
-- Sector- and trade-level drivers of P&L
-- Residuals requiring escalation
-- Trends that align or diverge from model expectations
+- **Tech Stack:** Python, Pandas, NumPy, Streamlit, Altair
+- **Data Modeling:**
+  - Synthetic options portfolio with sector/region diversity
+  - Simulated market time series (spot and vol) with realistic noise
+  - Position-level Greeks and actual P&L
+- **Core Analytics:**
+  - Taylor-series based explained P&L attribution
+  - Residual calculation (actual − explained)
+  - Cumulative P&L over time
+- **Interactive Features:**
+  - Group-by toggles (e.g. sector, region, long/short)
+  - Greek attribution tables and charts
+  - Trade-level drilldowns
+  - Date range filtering
 
-This improves transparency and supports daily sign-off for trading desks.
+---
+
+##  Impact & Use Cases
+
+- Helps **quantify and explain daily P&L** across complex portfolios
+- Ideal for:
+  - Derivatives risk teams
+  - Product controllers
+  - Risk analytics consultants
+- Useful for:
+  - Highlighting modeling errors or trade booking issues
+  - Residual anomaly detection
+  - Improving sign-off workflows with transparent logic
+
+---
+
+##  How to Run
+
+See the [README.md](./README.md) for setup instructions.
+
+Or launch the dashboard locally using:
+
+```bash
+streamlit run dashboard.py
