@@ -1,6 +1,6 @@
 # Data & Risk Analytics Portfolio
 
-Welcome to my project portfolio showcasing tools and analytics.
+Welcome to my portfolio showcasing tools and analytics projects.
 
 Each project is built around practical use cases in financial markets, risk management, and data infrastructure.
 
