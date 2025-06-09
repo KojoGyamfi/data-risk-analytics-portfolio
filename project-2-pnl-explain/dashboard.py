@@ -52,6 +52,21 @@ summary_df[["actual_pnl", "explained_pnl", "residual"]] = summary_df[
     ["actual_pnl", "explained_pnl", "residual"]
 ].round(2)
 
+colnames = {
+    "date": "Date",
+    group_key: group_key.replace("_", " ").title(),
+    "actual_pnl": "Actual P&L",
+    "explained_pnl": "Explained P&L",
+    "residual": "Residual",
+    "delta_pnl": "Delta P&L",
+    "gamma_pnl": "Gamma P&L",
+    "vega_pnl": "Vega P&L",
+    "theta_pnl": "Theta P&L"
+}
+
+summary_df = summary_df.rename(columns=colnames)
+
+
 st.dataframe(summary_df, use_container_width=True)
 
 # === Section 2: Table - Greek Breakdown ===
@@ -62,6 +77,20 @@ greek_df = greek_df.sort_values("date", ascending=False)
 greek_df[["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]] = greek_df[
     ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]
 ].round(2)
+
+colnames = {
+    "date": "Date",
+    group_key: group_key.replace("_", " ").title(),
+    "actual_pnl": "Actual P&L",
+    "explained_pnl": "Explained P&L",
+    "residual": "Residual",
+    "delta_pnl": "Delta P&L",
+    "gamma_pnl": "Gamma P&L",
+    "vega_pnl": "Vega P&L",
+    "theta_pnl": "Theta P&L"
+}
+
+greek_df = greek_df.rename(columns=nice_colnames)
 
 st.dataframe(greek_df, use_container_width=True)
 
