@@ -4,9 +4,8 @@ A streamlined, interactive Streamlit application for computing and visualizing p
 
 ---
 
-##  Overview
+## Features
 
-This dashboard allows users to:
 
 - Build a custom portfolio using real tickers (via Yahoo Finance)
 - Choose between **Historical VaR** and **Parametric VaR**:
