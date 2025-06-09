@@ -52,7 +52,8 @@ summary_df[["actual_pnl", "explained_pnl", "residual"]] = summary_df[
     ["actual_pnl", "explained_pnl", "residual"]
 ].round(2)
 
-colnames = {
+# Format column names
+nice_colnames = {
     "date": "Date",
     group_key: group_key.replace("_", " ").title(),
     "actual_pnl": "Actual P&L",
@@ -63,9 +64,7 @@ colnames = {
     "vega_pnl": "Vega P&L",
     "theta_pnl": "Theta P&L"
 }
-
-summary_df = summary_df.rename(columns=colnames)
-
+summary_df = summary_df.rename(columns=nice_colnames)
 
 st.dataframe(summary_df, use_container_width=True)
 
@@ -77,20 +76,7 @@ greek_df = greek_df.sort_values("date", ascending=False)
 greek_df[["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]] = greek_df[
     ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]
 ].round(2)
-
-colnames = {
-    "date": "Date",
-    group_key: group_key.replace("_", " ").title(),
-    "actual_pnl": "Actual P&L",
-    "explained_pnl": "Explained P&L",
-    "residual": "Residual",
-    "delta_pnl": "Delta P&L",
-    "gamma_pnl": "Gamma P&L",
-    "vega_pnl": "Vega P&L",
-    "theta_pnl": "Theta P&L"
-}
-
-greek_df = greek_df.rename(columns=colnames)
+greek_df = greek_df.rename(columns=nice_colnames)
 
 st.dataframe(greek_df, use_container_width=True)
 
@@ -109,3 +95,43 @@ area_chart = alt.Chart(grouped).transform_fold(
 ).properties(width=250, height=200)
 
 st.altair_chart(area_chart, use_container_width=True)
+
+# === Section 4: Cumulative P&L Trend ===
+st.subheader(f"📈 Cumulative Actual vs Explained P&L by {group_key}")
+
+# Compute cumulative P&L
+cumulative_df = (
+    grouped
+    .sort_values("date")
+    .groupby(group_key)
+    .apply(lambda d: d.assign(
+        cumulative_actual=d["actual_pnl"].cumsum(),
+        cumulative_explained=d["explained_pnl"].cumsum()
+    ))
+    .reset_index(drop=True)
+)
+
+# Reshape for Altair
+melted = cumulative_df.melt(
+    id_vars=["date", group_key],
+    value_vars=["cumulative_actual", "cumulative_explained"],
+    var_name="type",
+    value_name="value"
+)
+
+melted["type"] = melted["type"].map({
+    "cumulative_actual": "Cumulative Actual",
+    "cumulative_explained": "Cumulative Explained"
+})
+
+# Draw chart
+cumulative_chart = alt.Chart(melted).mark_line().encode(
+    x="date:T",
+    y="value:Q",
+    color="type:N",
+    tooltip=["date:T", "type:N", "value:Q"],
+).facet(
+    column=alt.Column(f"{group_key}:N", title=None)
+).properties(width=250, height=200)
+
+st.altair_chart(cumulative_chart, use_container_width=True)
