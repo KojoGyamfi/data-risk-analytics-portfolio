@@ -12,17 +12,8 @@ Each project is built around practical use cases in financial markets, risk mana
 2. **[P&L Explain Tool with Greek Attribution](./project-2-pnl-explain)**  
    Breaks down daily P&L into key drivers like delta, gamma, vega, and theta.
 
-3. **[Risk Limit Breach Monitoring Engine](./project-3-limit-monitoring)**  
-   Automated Python engine that detects and alerts on portfolio breaches.
-
-4. **[ETL Pipeline for Commodities Pricing](./project-4-commodities-etl)**  
+3. **[ETL Pipeline for Commodities Pricing](./project-4-commodities-etl)**  
    Pulls and stores power, LNG, and emissions price data for analytics use.
-
-5. **[Backtesting Framework for Risk-Controlled Strategies](./project-5-backtesting-framework)**  
-   Tests strategies with VaR overlays and risk-adjusted metrics like Sharpe.
-
-6. **[Gap Analysis for Legacy DB Migration](./project-6-gap-analysis)**  
-   Business and technical analysis of migrating from Oracle to Athena.
 
 ---
 
