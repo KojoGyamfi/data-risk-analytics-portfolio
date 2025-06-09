@@ -99,7 +99,6 @@ st.altair_chart(area_chart, use_container_width=True)
 # === Section 4: Cumulative P&L Trend ===
 st.subheader(f"📈 Cumulative Actual vs Explained P&L by {group_key}")
 
-# Compute cumulative P&L
 cumulative_df = (
     grouped
     .sort_values("date")
@@ -111,7 +110,6 @@ cumulative_df = (
     .reset_index(drop=True)
 )
 
-# Reshape for Altair
 melted = cumulative_df.melt(
     id_vars=["date", group_key],
     value_vars=["cumulative_actual", "cumulative_explained"],
@@ -124,14 +122,16 @@ melted["type"] = melted["type"].map({
     "cumulative_explained": "Cumulative Explained"
 })
 
-# Draw chart
 cumulative_chart = alt.Chart(melted).mark_line().encode(
     x="date:T",
     y="value:Q",
     color="type:N",
     tooltip=["date:T", "type:N", "value:Q"],
-).facet(
-    column=alt.Column(f"{group_key}:N", title=None)
 ).properties(width=250, height=200)
+
+cumulative_chart = cumulative_chart.facet(
+    column=alt.Column(f"{group_key}:N", title=None)
+)
+
 
 st.altair_chart(cumulative_chart, use_container_width=True)
