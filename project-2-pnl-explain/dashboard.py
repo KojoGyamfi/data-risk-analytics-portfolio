@@ -11,12 +11,12 @@ def load_data():
     return df
 
 df = load_data()
-df["date"] = df["date"].dt.date
 
-st.title("📈 Multi-Day P&L Attribution Dashboard")
+
+st.title("Multi-Day P&L Attribution Dashboard")
 
 # Sidebar filters
-st.sidebar.header("🔍 Filters")
+st.sidebar.header("Filters")
 group_key = st.sidebar.selectbox("Group by", ["ticker", "sector", "region", "long_short"])
 date_range = st.sidebar.date_input(
     "Select date range",
@@ -49,6 +49,7 @@ st.subheader(f"Daily Actual vs Explained P&L by {group_key}")
 
 summary_df = grouped[["date", group_key, "actual_pnl", "explained_pnl", "residual"]].copy()
 summary_df = summary_df.sort_values("date", ascending=False)
+summary_df["date"] = summary_df["date"].dt.strftime("%Y-%m-%d")
 summary_df[["actual_pnl", "explained_pnl", "residual"]] = summary_df[
     ["actual_pnl", "explained_pnl", "residual"]
 ].round(2)
@@ -76,6 +77,7 @@ st.subheader(f"Daily Greek Attribution by {group_key}")
 
 greek_df = grouped[["date", group_key, "delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]].copy()
 greek_df = greek_df.sort_values("date", ascending=False)
+greek_df["date"] = greek_df["date"].dt.strftime("%Y-%m-%d")
 greek_df[["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]] = greek_df[
     ["delta_pnl", "gamma_pnl", "vega_pnl", "theta_pnl"]
 ].round(2)
@@ -157,6 +159,7 @@ cols = [
     "explained_pnl", "actual_pnl", "residual"
 ]
 drilldown_df = drilldown_df[cols].sort_values(["date", "trade_id"])
+drilldown_df["date"] = drilldown_df["date"].dt.strftime("%Y-%m-%d")
 drilldown_df = drilldown_df.round(2)
 drilldown_df = drilldown_df.rename(columns=colnames)
 
