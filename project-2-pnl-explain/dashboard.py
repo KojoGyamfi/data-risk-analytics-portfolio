@@ -11,6 +11,7 @@ def load_data():
     return df
 
 df = load_data()
+df["date"] = df["date"].dt.date
 
 st.title("📈 Multi-Day P&L Attribution Dashboard")
 
