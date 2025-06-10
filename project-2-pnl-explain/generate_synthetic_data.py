@@ -3,7 +3,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import os
 
-# === Generate Only Weekday Dates ===
+# Generate Only Weekday Dates 
 def generate_trading_days(start_date, num_days_required):
     dates = []
     current = start_date
@@ -13,14 +13,14 @@ def generate_trading_days(start_date, num_days_required):
         current += timedelta(days=1)
     return dates
 
-# === Generate Sector-Wide Price Drivers ===
+# Generate Sector-Wide Price Drivers
 def generate_sector_drivers(sectors, num_days):
     return {
         sector: np.cumsum(np.random.normal(0, 1, num_days))
         for sector in sectors
     }
 
-# === Generate Market Data ===
+# Generate Market Data
 def generate_market_data(tickers, sector_drivers, dates, output_path):
     market_data = []
     num_days = len(dates)
@@ -50,7 +50,7 @@ def generate_market_data(tickers, sector_drivers, dates, output_path):
     df.to_csv(output_path, index=False)
     return df
 
-# === Generate Portfolio Positions ===
+# Generate Portfolio Positions
 def generate_positions(tickers, start_date, num_trades, output_path):
     positions = []
     ticker_list = list(tickers.keys())
@@ -82,7 +82,7 @@ def generate_positions(tickers, start_date, num_trades, output_path):
     df.to_csv(output_path, index=False)
     return df
 
-# === Simulate Daily Actual P&L ===
+# Simulate Daily Actual P&L
 def simulate_actual_pnl(positions, market_df, output_path):
     records = []
 
@@ -122,7 +122,7 @@ def simulate_actual_pnl(positions, market_df, output_path):
     df.to_csv(output_path, index=False)
     return df
 
-# === Main Runner ===
+# Main Runner
 def main():
     np.random.seed(42)
     output_dir = "data"
@@ -150,6 +150,6 @@ def main():
 
     print("✅ Synthetic data generated (weekdays only) and saved to 'data/'")
 
-# === Entry Point ===
+# Entry Point
 if __name__ == "__main__":
     main()
