@@ -3,6 +3,8 @@ import pandas as pd
 import altair as alt
 import os
 
+st.set_page_config(layout="wide")
+
 # Load Data
 @st.cache_data
 def load_data():
