@@ -45,11 +45,12 @@ A streamlined, interactive Streamlit application for computing and visualizing p
 
 ---
 
-##  Usage
-
-###  Requirements
-
-Make sure you have Python 3.8+ installed, then install dependencies from requirements.txt:
+## Usage
 
 ```bash
+# Step 1: Install dependencies
 pip install -r requirements.txt
+
+# Step 2: Run the dashboard
+streamlit run app.py
+```
