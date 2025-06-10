@@ -24,6 +24,12 @@ project/
 │   ├── positions.csv
 │   ├── market_data.csv
 │   └── pnl_actuals.csv
+├── screenshots/
+│   ├── cumulative_view.png
+│   ├── drilldown.png
+│   ├── greek_attribution.png
+│   ├── overview.png
+│   └── summary.png
 ├── generate_synthetic_data.py
 ├── pnl_model.py
 └── dashboard.py
