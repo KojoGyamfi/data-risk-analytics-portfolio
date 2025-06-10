@@ -45,7 +45,7 @@ A streamlined, interactive Streamlit application for computing and visualizing p
 
 ---
 
-##  How to Run
+##  Usage
 
 ###  Requirements
 
