@@ -7,15 +7,11 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 from io import BytesIO
 
-# --------------------------
 # Page Setup
-# --------------------------
 st.set_page_config(page_title="Real Portfolio VaR Dashboard", layout="wide")
 st.title("Daily VaR & Risk Dashboard – Real Portfolio")
 
-# --------------------------
 # Sidebar Inputs
-# --------------------------
 st.sidebar.header("Portfolio Configuration")
 tickers = st.sidebar.multiselect(
     "Select Assets (max 5):",
@@ -51,9 +47,7 @@ vol_window = st.sidebar.slider("Rolling Volatility Window (Days)", 10, 60, 20)
 start_date = st.sidebar.date_input("Start Date", value=pd.to_datetime("2023-01-01"))
 end_date = st.sidebar.date_input("End Date", value=pd.to_datetime("2025-01-01"))
 
-# --------------------------
-# Data Fetching (Robust Fix)
-# --------------------------
+# Data Fetching 
 try:
     data = yf.download(tickers, start=start_date, end=end_date)
 
@@ -90,9 +84,7 @@ except Exception as e:
     st.error(f"Error fetching data: {e}")
     st.stop()
 
-# --------------------------
-# Risk Metrics (Updated)
-# --------------------------
+# Risk Metrics
 def calculate_historical_var(series, confidence=0.95):
     sorted_returns = series.sort_values()
     index = int((1 - confidence) * len(sorted_returns))
@@ -115,9 +107,7 @@ historical_var = calculate_historical_var(portfolio_returns, confidence=confiden
 expected_shortfall = calculate_expected_shortfall(portfolio_returns, confidence=confidence_level)
 annual_volatility = rolling_vol * np.sqrt(252)
 
-# --------------------------
 # Export Report
-# --------------------------
 def convert_df_to_csv(df):
     return df.to_csv(index=True).encode('utf-8')
 
@@ -138,9 +128,7 @@ report_df = pd.DataFrame({
 
 csv = convert_df_to_csv(report_df)
 
-# --------------------------
 # Dashboard Display
-# --------------------------
 st.subheader("Portfolio Risk Summary")
 
 col1, col2 = st.columns(2)
