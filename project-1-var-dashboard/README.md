@@ -1,6 +1,7 @@
 #  Daily VaR & Risk Dashboard
 
 An interactive dashboard built utilising Python with Streamlit to visualise historic and parametric Value-at-Risk (VaR), Expected Shortfall, and Volatility of an Equities portfolio using real market data sourced from the Yahoo Finance API.
+
 ---
 
 ## Features
