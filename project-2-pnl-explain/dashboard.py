@@ -130,7 +130,10 @@ melted["type"] = melted["type"].map({
 cumulative_chart = alt.Chart(melted).mark_line().encode(
     x="date:T",
     y="value:Q",
-    color="type:N",
+    color=alt.Color("type:N", scale=alt.Scale(
+        domain=["Cumulative Actual", "Cumulative Explained"],
+        range=["#1f77b4", "#ff7f0e"]
+    )),
     tooltip=["date:T", "type:N", "value:Q"],
 ).properties(width=250, height=200)
 
