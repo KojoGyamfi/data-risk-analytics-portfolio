@@ -56,7 +56,6 @@ summary_df[["actual_pnl", "explained_pnl", "residual"]] = summary_df[
     ["actual_pnl", "explained_pnl", "residual"]
 ].round(2)
 
-# Format column names
 colnames = {
     "date": "Date",
     group_key: group_key.replace("_", " ").title(),
