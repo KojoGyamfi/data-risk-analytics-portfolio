@@ -12,7 +12,7 @@ Each project is built around practical use cases in financial markets, risk mana
 2. **[P&L Explain Tool with Greek Attribution](./project-2-pnl-explain)**  
    Breaks down daily P&L into key drivers like delta, gamma, vega, and theta.
 
-3. **[ETL Pipeline for Commodities Pricing](./project-3-commodities-etl)**  
+3. **[ETL Pipeline for Commodities Pricing](./project-3-commod-etl)**  
    Pulls and stores power, LNG, and emissions price data for analytics use.
 
 4. **[Monte Carlo Pricing Engine for Option Pricing](./project-4-monte-carlo-engine)**  
