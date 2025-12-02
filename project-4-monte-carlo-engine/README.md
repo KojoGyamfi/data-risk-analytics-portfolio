@@ -16,21 +16,21 @@ We want to price a European option (call/put) written on an underlying asset \( 
 
 Under the usual assumptions (frictionless markets, no arbitrage, constant \( r \) and \( \sigma \)), the **risk-neutral dynamics** of the underlying are:
 
-\[
+$$
 dS_t = r S_t\,dt + \sigma S_t\,dW_t,
-\]
+$$
 
 which has the solution:
 
-\[
+$$
 S_T = S_0 \exp\left[\left(r - \tfrac{1}{2}\sigma^2\right)T + \sigma \sqrt{T}\,Z\right], \quad Z \sim \mathcal{N}(0, 1).
-\]
+$$
 
 For a European option with payoff \( \Phi(S_T) \), the **arbitrage-free price** at time 0 is:
 
-\[
+$$
 V_0 = e^{-rT} \mathbb{E}^{\mathbb{Q}}[\Phi(S_T)].
-\]
+$$
 
 Analytically, a European call has the **Black–Scholes formula**, but:
 
@@ -49,12 +49,12 @@ This project therefore:
 
 ### 2.1 Risk-Neutral Simulation
 
-Under \( \mathbb{Q} \), for maturity \( T \):
+Under the risk-neutral measure \( \mathbb{Q} \), for maturity \( T \):
 
-\[
+$$
 S_T = S_0 \exp\left[\left(r - \tfrac{1}{2}\sigma^2\right)T + \sigma \sqrt{T}\,Z\right],
 \quad Z \sim \mathcal{N}(0, 1).
-\]
+$$
 
 We simulate \( N \) independent paths \( S_T^{(i)} \) and compute discounted payoffs:
 
@@ -63,17 +63,17 @@ We simulate \( N \) independent paths \( S_T^{(i)} \) and compute discounted pay
 
 Estimator:
 
-\[
+$$
 \hat{V}_0 = e^{-rT} \cdot \frac{1}{N}\sum_{i=1}^N \Phi\left(S_T^{(i)}\right).
-\]
+$$
 
 By the **Law of Large Numbers**, \( \hat{V}_0 \to V_0 \) as \( N \to \infty \).
 
 By the **Central Limit Theorem**, we also estimate a **standard error**:
 
-\[
+$$
 \text{StdErr}(\hat{V}_0) \approx \frac{\hat{\sigma}_{\text{payoff}}}{\sqrt{N}},
-\]
+$$
 
 and construct a 95% confidence interval.
 
@@ -81,9 +81,9 @@ and construct a 95% confidence interval.
 
 For calls, we also compute the **Black–Scholes price** and check that:
 
-\[
+$$
 \hat{V}_0^{\text{MC}} \approx V_0^{\text{BS}}
-\]
+$$
 
 within the Monte Carlo confidence interval. This validates:
 
@@ -99,16 +99,16 @@ within the Monte Carlo confidence interval. This validates:
 
 - `models.py`  
   Defines `GBMModel` with parameters:
-  - `spot` \( S_0 \)
-  - `rate` \( r \)
-  - `vol` \( \sigma \)  
+  - `spot` ( \( S_0 \) )
+  - `rate` ( \( r \) )
+  - `vol`  ( \( \sigma \) )  
   Provides:
   - `simulate_terminal(T, n_paths, rng)` → samples of \( S_T \).
 
 - `products.py`  
   Defines a `EuropeanOption` and an `OptionType` enum (CALL / PUT), with:
-  - `strike` \( K \)
-  - `maturity` \( T \)
+  - `strike` ( \( K \) )
+  - `maturity` ( \( T \) )
   - `payoff(S_T)` → vectorised payoff.
 
 - `engine.py`  
@@ -119,9 +119,9 @@ within the Monte Carlo confidence interval. This validates:
   - Returns:
     ```python
     {
-      "price": float,
-      "std_error": float,
-      "conf_int_95": (lower, upper),
+        "price": float,
+        "std_error": float,
+        "conf_int_95": (lower, upper),
     }
     ```
 
