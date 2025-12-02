@@ -1,0 +1,19 @@
+# Python bytecode/cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Compiled extensions
+*.pyd
+
+# Build artefacts
+build/
+dist/
+*.egg-info/
+
+# VS Code settings
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
