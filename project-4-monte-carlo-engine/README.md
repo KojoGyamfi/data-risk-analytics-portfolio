@@ -6,8 +6,6 @@ This project implements a **Monte Carlo pricing engine** for European options un
 - A **C++ backend exposed via pybind11** (for performance and “systems” signal),
 - An interactive **Streamlit app** to explore distributions and GBM paths visually.
 
-It’s designed as a portfolio piece for **quant developer / computational finance** roles and MSc applications.
-
 ---
 
 ## 1. Problem & Motivation
