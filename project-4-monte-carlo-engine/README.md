@@ -12,7 +12,7 @@ This project implements a **Monte Carlo pricing engine** for European options un
 
 We want to price a European option (call/put) written on an underlying asset \( S_t \).
 
-Under the usual assumptions (frictionless markets, no arbitrage, constant \( r \) and \( \sigma \)), the **risk-neutral dynamics** of the underlying are:
+Under the usual assumptions (frictionless markets, no arbitrage, constant \( r \) and \( sigma \)), the **risk-neutral dynamics** of the underlying are:
 
 $$
 dS_t = r S_t\,dt + \sigma S_t\,dW_t,
