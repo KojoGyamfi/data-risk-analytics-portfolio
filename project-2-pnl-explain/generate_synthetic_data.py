@@ -148,7 +148,7 @@ def main():
     positions_df = generate_positions(tickers, dates[0], 50, f"{output_dir}/positions.csv")
     simulate_actual_pnl(positions_df.to_dict("records"), market_df, f"{output_dir}/pnl_actuals.csv")
 
-    print("✅ Synthetic data generated (weekdays only) and saved to 'data/'")
+    print("Synthetic data generated (weekdays only) and saved to 'data/'")
 
 # Entry Point
 if __name__ == "__main__":

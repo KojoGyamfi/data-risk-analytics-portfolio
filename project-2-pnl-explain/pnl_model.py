@@ -66,7 +66,7 @@ def main():
     positions_df, market_df, pnl_df = load_data(data_dir)
     explained_df = compute_daily_pnl_explained(positions_df, market_df, pnl_df)
     explained_df.to_csv(output_file, index=False)
-    print(f"✅ Multi-day attribution saved to {output_file}")
+    print(f"Multi-day attribution saved to {output_file}")
 
 if __name__ == "__main__":
     main()
