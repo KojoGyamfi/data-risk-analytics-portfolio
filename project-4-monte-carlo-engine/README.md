@@ -153,16 +153,10 @@ within the Monte Carlo confidence interval. This validates:
 ---
 
 ## Dashboard Preview
-![Summary Table](./screenshots/summary.png)
+![Summary](./screenshots/streamlit_preview.png)
 *Actual vs Explained P&L by group*
 
-![Greek Attribution](./screenshots/greek_attribution.png)
+![Greek Attribution](./screenshots/gbm_paths.png)
 *Table + stacked area chart*
-
-![Cumulative View](./screenshots/cumulative_view.png)
-*Trends of explained vs actual P&L*
-
-![Drilldown](./screenshots/drilldown.png)
-*Inspect trades by ticker, sector, or region*
 
 ---
