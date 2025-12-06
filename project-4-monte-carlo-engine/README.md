@@ -154,7 +154,7 @@ within the Monte Carlo confidence interval. This validates:
 
 ## Dashboard Preview
 ![Summary](./screenshots/streamlit_preview.png)
-*Preview of dashboard showing summary statistics and*
+*Preview of dashboard showing summary statistics, discounted prices and distribution of terminal price*
 
 ![Greek Attribution](./screenshots/gbm_paths.png)
 *Sample GBM Paths chart*
