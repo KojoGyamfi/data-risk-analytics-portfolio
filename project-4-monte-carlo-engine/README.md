@@ -154,9 +154,9 @@ within the Monte Carlo confidence interval. This validates:
 
 ## Dashboard Preview
 ![Summary](./screenshots/streamlit_preview.png)
-*Actual vs Explained P&L by group*
+*Preview of dashboard showing summary statistics and*
 
 ![Greek Attribution](./screenshots/gbm_paths.png)
-*Table + stacked area chart*
+*Sample GBM Paths chart*
 
 ---
