@@ -116,7 +116,6 @@ project-3-commidities-etl/
 ├─ pipelines/
 │  └─ daily_prices.py        # entry point: run ETL for a date range
 ├─ streamlit_app.py          # Streamlit dashboard (prices + indices + stats)
-├─ data_samples/             # (placeholder, if you later add CSV demos/tests)
 ├─ .env.example              # template for API keys and DB URL
 ├─ requirements.txt
 └─ README.md
