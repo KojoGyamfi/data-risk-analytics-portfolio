@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 
 import pandas as pd
@@ -42,7 +42,7 @@ def normalise_prices(
     df["currency"] = meta["currency"]
     df["unit"] = meta["unit"]
     df["source"] = source_name
-    df["created_at"] = datetime.utcnow()
+    df["created_at"] = datetime.now(timezone.utc)
 
     # Ensure trade_date is date type
     if pd.api.types.is_datetime64_any_dtype(df["trade_date"]):
