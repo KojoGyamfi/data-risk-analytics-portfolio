@@ -1,4 +1,4 @@
-# Project 4 – Monte Carlo GBM Option Pricing Engine (Python + C++)
+# Project 4 – Monte Carlo GBM Option Pricing Engine (Python / C++)
 
 This project implements a **Monte Carlo pricing engine** for European options under a **risk-neutral Geometric Brownian Motion (GBM)** model, with:
 
