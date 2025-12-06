@@ -12,6 +12,9 @@ Each project is built around practical use cases in financial markets, risk mana
 2. **[P&L Explain Tool with Greek Attribution](./project-2-pnl-explain)**  
    Breaks down daily P&L into key drivers like delta, gamma, vega, and theta.
 
+3. **[Commodities Price ETL](./project-3-commodities-etl)**  
+   Monte Carlo model to price a European Option under GBM using Python and C++ 
+
 4. **[Monte Carlo Pricing Engine for Option Pricing](./project-4-monte-carlo-engine)**  
    Monte Carlo model to price a European Option under GBM using Python and C++
 ---
