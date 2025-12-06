@@ -100,7 +100,7 @@ Extractor:
 ### 2.2 Project Structure
 
 ```text
-project-3-commidities-etl/
+project-3-commodities-etl/
 ├─ etl/
 │  ├─ __init__.py
 │  ├─ config.py              # config (DB URL, API keys, commodity metadata)
