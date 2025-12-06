@@ -21,10 +21,7 @@ Each project is built around a practical use case, with an emphasis on clean eng
    - European power day-ahead prices from **ENTSO-E**, and  
    - Henry Hub natural gas spot prices from the **EIA Open Data API (v2)**.  
 
-   Data is normalised into a single `prices` table (SQLite by default, easily switchable to Postgres), and exposed via a Streamlit app that provides:
-   - time-series charts for POWER and GAS (with proper units),  
-   - normalised price indices (start = 100) for relative performance, and  
-   - summary statistics and data preview for quick QA and analysis.
+   Data is normalised into a single `prices` table (SQLite by default, easily switchable to Postgres), and exposed via a Streamlit app.
 
 4. **[Monte Carlo Pricing Engine for European Options](./project-4-monte-carlo-engine)**  
    Monte Carlo engine to price European options under Geometric Brownian Motion (GBM), with:
